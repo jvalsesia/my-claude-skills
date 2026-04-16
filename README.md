@@ -50,8 +50,35 @@ Scaffolds a production-ready Rust/Axum REST API with PostgreSQL, JWT auth, reque
 
 ---
 
+## Installation
+
+Claude Code does not support installing skills directly from a GitHub URL — you need to clone this repo and copy the skills into the right directory manually.
+
+**Personal install** (available across all your projects):
+
+```bash
+git clone https://github.com/jvalsesia/my-claude-skills /tmp/my-claude-skills
+cp -r /tmp/my-claude-skills/rust-axum-bootstrap ~/.claude/skills/
+```
+
+**Project install** (available only in the current project):
+
+```bash
+git clone https://github.com/jvalsesia/my-claude-skills /tmp/my-claude-skills
+cp -r /tmp/my-claude-skills/rust-axum-bootstrap .claude/skills/
+```
+
+| Location | Scope |
+|---|---|
+| `~/.claude/skills/<skill>/` | All your projects |
+| `.claude/skills/<skill>/` | Current project only |
+
+Changes to existing skills take effect immediately. If you create the `.claude/skills/` directory for the first time, restart Claude Code to pick it up.
+
+---
+
 ## How to use
 
-Skills are picked up automatically by Claude Code when this directory is registered. Invoke any skill by typing its trigger phrase in a conversation.
+Once installed, invoke any skill by typing its trigger phrase in a conversation — no slash command needed. Claude detects the intent and runs the skill automatically.
 
 To add a new skill: create a subdirectory with a `SKILL.md` describing the workflow and any supporting scripts or templates.
