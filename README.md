@@ -40,12 +40,14 @@ Scaffolds a production-ready Rust/Axum REST API with PostgreSQL, JWT auth, reque
 **Triggers:** "bootstrap a rust api", "scaffold a rust axum project", "new rust backend"
 
 **What you get:**
-- Axum typed routing + SQLx migrations
-- JWT authentication middleware
+- Axum 0.8 typed routing + SQLx migrations
+- JWT authentication middleware (native async-in-traits, no `async_trait` macro)
 - `validator` crate for request validation
 - `tracing` structured logging
 - `sqlx::test` integration test infrastructure
-- Operational scripts: `init`, `watch`, `deploy`, `tmux-dev`
+- `docker-compose.yml` with postgres 17 + auto-created test database
+- `Dockerfile` with multi-stage build for production
+- Operational scripts: `init` (Docker-backed), `down --docker`, `check`, `watch`, `deploy`, `tmux-dev`
 - A generated `CLAUDE.md` with project-specific conventions
 
 ---

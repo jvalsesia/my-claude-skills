@@ -9,11 +9,13 @@ LOG_FILE="/tmp/{{PROJECT_NAME}}-server.log"
 
 FORCE=false
 CLEAN=false
+DOCKER=false
 
 for arg in "$@"; do
     case $arg in
         --force) FORCE=true ;;
         --clean) CLEAN=true ;;
+        --docker) DOCKER=true ;;
     esac
 done
 
@@ -56,6 +58,12 @@ if [ "$FORCE" = true ]; then
     echo "[down] done"
 else
     stop_server
+fi
+
+if [ "$DOCKER" = true ]; then
+    echo "[down] stopping Docker containers..."
+    docker compose down
+    echo "[down] containers stopped"
 fi
 
 if [ "$CLEAN" = true ]; then

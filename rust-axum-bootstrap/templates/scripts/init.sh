@@ -42,18 +42,22 @@ if ! is_port_free "$SERVER_PORT"; then
     echo "[init] assigned port $SERVER_PORT"
 fi
 
-# ── Step 3: ensure PostgreSQL databases exist ──────────────────────────────────
-DB_NAME="{{PROJECT_DB_NAME}}"
-DB_TEST_NAME="{{PROJECT_DB_NAME}}_test"
+# ── Step 3: start PostgreSQL via Docker ────────────────────────────────────────
+echo "[init] starting PostgreSQL via Docker..."
+docker compose up -d postgres
 
-echo "[init] ensuring databases exist..."
-psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$DB_NAME'" | grep -q 1 \
-    || psql -U postgres -c "CREATE DATABASE $DB_NAME" \
-    && echo "[init] $DB_NAME already exists"
-
-psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$DB_TEST_NAME'" | grep -q 1 \
-    || psql -U postgres -c "CREATE DATABASE $DB_TEST_NAME" \
-    && echo "[init] $DB_TEST_NAME already exists"
+echo "[init] waiting for postgres to be healthy..."
+RETRIES=20
+until docker compose exec -T postgres pg_isready -U postgres -d {{PROJECT_DB_NAME}} >/dev/null 2>&1; do
+    RETRIES=$((RETRIES - 1))
+    if [ "$RETRIES" -eq 0 ]; then
+        echo "[init] ERROR: postgres did not become healthy in time" >&2
+        docker compose logs postgres >&2
+        exit 1
+    fi
+    sleep 2
+done
+echo "[init] postgres ready"
 
 # ── Step 4: run migrations ─────────────────────────────────────────────────────
 echo "[init] running migrations..."

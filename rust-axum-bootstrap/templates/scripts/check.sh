@@ -42,6 +42,21 @@ else
     print_pending "DATABASE_URL not set in .env"
 fi
 
+# ── Check Docker containers ────────────────────────────────────────────────────
+if command -v docker >/dev/null 2>&1; then
+    if docker compose ps --status running 2>/dev/null | grep -q "postgres"; then
+        print_ok "postgres container running"
+    else
+        print_pending "postgres container not running — run ./scripts/init.sh"
+        if [ "$FIX" = true ]; then
+            echo "    → starting postgres..."
+            docker compose up -d postgres
+        fi
+    fi
+else
+    print_warn "docker not found — cannot check container status"
+fi
+
 # ── Check server ───────────────────────────────────────────────────────────────
 SERVER_PORT="8080"
 if [ -f "$ENV_FILE" ]; then

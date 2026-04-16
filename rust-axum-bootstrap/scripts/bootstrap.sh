@@ -87,15 +87,23 @@ for f in "$TEMPLATES_DIR/migrations"/*.sql; do
 done
 
 # ── Step 5: Copy scripts ──────────────────────────────────────────────────────
-echo "[5/9] copying scripts..."
+echo "[5/10] copying scripts..."
 mkdir -p "$PROJECT_DIR/scripts"
 for script in init down check watch tmux-dev deploy; do
     copy_and_sub "$TEMPLATES_DIR/scripts/${script}.sh" "$PROJECT_DIR/scripts/${script}.sh"
     chmod +x "$PROJECT_DIR/scripts/${script}.sh"
 done
 
-# ── Step 6: Create .env files ─────────────────────────────────────────────────
-echo "[6/9] creating environment files..."
+# ── Step 6: Copy Docker files ─────────────────────────────────────────────────
+echo "[6/10] copying Docker files..."
+copy_and_sub "$TEMPLATES_DIR/docker-compose.yml.template" "$PROJECT_DIR/docker-compose.yml"
+copy_and_sub "$TEMPLATES_DIR/Dockerfile.template"         "$PROJECT_DIR/Dockerfile"
+mkdir -p "$PROJECT_DIR/docker"
+copy_and_sub "$TEMPLATES_DIR/docker/init-db.sh"           "$PROJECT_DIR/docker/init-db.sh"
+chmod +x "$PROJECT_DIR/docker/init-db.sh"
+
+# ── Step 7: Create .env files ─────────────────────────────────────────────────
+echo "[7/10] creating environment files..."
 copy_and_sub "$TEMPLATES_DIR/env-example.txt" "$PROJECT_DIR/.env.example"
 
 # .env.test for CI / sqlx::test macro override
@@ -106,12 +114,12 @@ JWT_EXPIRY_HOURS=1
 RUST_LOG=error
 EOF
 
-# ── Step 7: Generate CLAUDE.md ────────────────────────────────────────────────
-echo "[7/9] generating CLAUDE.md..."
+# ── Step 8: Generate CLAUDE.md ────────────────────────────────────────────────
+echo "[8/10] generating CLAUDE.md..."
 copy_and_sub "$TEMPLATES_DIR/claude-md.md" "$PROJECT_DIR/CLAUDE.md"
 
-# ── Step 8: Create .gitignore ─────────────────────────────────────────────────
-echo "[8/9] creating .gitignore..."
+# ── Step 9: Create .gitignore ─────────────────────────────────────────────────
+echo "[9/10] creating .gitignore..."
 cat > "$PROJECT_DIR/.gitignore" << 'EOF'
 /target
 .env
@@ -119,8 +127,8 @@ cat > "$PROJECT_DIR/.gitignore" << 'EOF'
 *.log
 EOF
 
-# ── Step 9: Verify sqlx-cli is available (informational) ─────────────────────
-echo "[9/9] checking toolchain..."
+# ── Step 10: Verify toolchain (informational) ─────────────────────────────────
+echo "[10/10] checking toolchain..."
 
 if ! command -v rustup >/dev/null 2>&1; then
     echo "  ⚠ rustup not found — install from https://rustup.rs"
@@ -140,6 +148,12 @@ else
     echo "  ✓ $(sqlx --version 2>/dev/null || echo 'sqlx-cli')"
 fi
 
+if ! command -v docker >/dev/null 2>&1; then
+    echo "  ⚠ docker not found — install from https://docs.docker.com/get-docker/"
+else
+    echo "  ✓ $(docker --version 2>/dev/null || echo 'docker')"
+fi
+
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
 echo "=== bootstrap complete ==="
@@ -150,7 +164,7 @@ echo ""
 echo "  init.sh will:"
 echo "    1. Create .env from .env.example"
 echo "    2. Find a free port if default (8080) is occupied"
-echo "    3. Create PostgreSQL databases ($PROJECT_DB_NAME + ${PROJECT_DB_NAME}_test)"
+echo "    3. Start PostgreSQL via Docker (docker compose up -d postgres)"
 echo "    4. Run SQLx migrations"
 echo "    5. Build and start the server"
 echo "    6. Verify health at /health"

@@ -27,6 +27,7 @@ uuid = { version = "1", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 validator = { version = "0.18", features = ["derive"] }
 thiserror = "2"
+anyhow = "1"
 tower-http = { version = "0.6", features = ["cors", "trace", "request-id"] }
 axum-extra = { version = "0.9", features = ["typed-header"] }
 
