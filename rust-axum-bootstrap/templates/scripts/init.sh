@@ -61,7 +61,15 @@ echo "[init] postgres ready"
 
 # ── Step 4: run migrations ─────────────────────────────────────────────────────
 echo "[init] running migrations..."
-DATABASE_URL="${DATABASE_URL}" sqlx migrate run --source "$PROJECT_DIR/migrations"
+if command -v sqlx >/dev/null 2>&1; then
+    DATABASE_URL="${DATABASE_URL}" sqlx migrate run --source "$PROJECT_DIR/migrations"
+elif cargo sqlx migrate run --source "$PROJECT_DIR/migrations" 2>/dev/null; then
+    : # cargo sqlx succeeded
+else
+    echo "[init] ERROR: sqlx-cli not found. Install it with:" >&2
+    echo "    cargo install sqlx-cli --no-default-features --features rustls,postgres" >&2
+    exit 1
+fi
 echo "[init] migrations applied"
 
 # ── Step 5: build the project ──────────────────────────────────────────────────

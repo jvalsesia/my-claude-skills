@@ -89,7 +89,9 @@ else
 fi
 
 # ── Check migrations ───────────────────────────────────────────────────────────
-if [ -f "$ENV_FILE" ] && command -v sqlx >/dev/null 2>&1; then
+if [ -f "$ENV_FILE" ] && ! command -v sqlx >/dev/null 2>&1; then
+    print_warn "sqlx-cli not found — skipping migration check (install: cargo install sqlx-cli --no-default-features --features rustls,postgres)"
+elif [ -f "$ENV_FILE" ] && command -v sqlx >/dev/null 2>&1; then
     DB_URL="$(grep '^DATABASE_URL=' "$ENV_FILE" | cut -d= -f2-)"
     PENDING_MIGRATIONS=$(DATABASE_URL="$DB_URL" sqlx migrate info --source "$PROJECT_DIR/migrations" 2>/dev/null | grep -c "pending" || echo "0")
     if [ "$PENDING_MIGRATIONS" -eq 0 ]; then
