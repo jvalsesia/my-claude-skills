@@ -1,0 +1,12 @@
+# Server
+SERVER_PORT=8080
+PORT_RANGE="8080 8090"
+RUST_LOG=info
+
+# Database
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/{{PROJECT_DB_NAME}}"
+DATABASE_URL_TEST="postgresql://postgres:postgres@localhost:5432/{{PROJECT_DB_NAME}}_test"
+
+# JWT
+JWT_SECRET="development-secret-change-in-production-min-32-chars"
+JWT_EXPIRY_HOURS=24
